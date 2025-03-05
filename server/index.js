@@ -8,8 +8,11 @@ const jose = require("node-jose"); // Required for decrypting `id_token`
 
 const app = express();
 const PORT = 3000;
+const jwksPath = path.resolve(__dirname, "./oidc-v2-rp-public.json"); // ✅ Ensure the file exists
+const jwks = JSON.parse(fs.readFileSync(jwksPath, "utf8"));
 
 app.use(express.json());
+
 
 // Enable CORS
 app.use((req, res, next) => {
@@ -65,6 +68,11 @@ if (!verificationKey) {
 }
 const publicKeyPem = jwkToPem(verificationKey); // Convert JWK to PEM
 
+
+app.get("/.well-known/jwks.json", (req, res) => {
+  res.json(jwks);
+});
+
 // Singpass Callback Route
 app.get("/singpass/callback", async (req, res) => {
   const { code } = req.query;
@@ -119,7 +127,8 @@ app.get("/singpass/callback", async (req, res) => {
         const decrypted = await jose.JWE.createDecrypt(key).decrypt(id_token);
         const decryptedToken = decrypted.plaintext.toString();
 
-        // Now verify the decrypted JWT using the public key
+        console.log("🔹 Decrypted token:", decryptedToken);
+
         try {
           const decodedToken = jwt.decode(decryptedToken, { complete: true });
           

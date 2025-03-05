@@ -1,10 +1,14 @@
-import React from "react";
-import LoginScreen from "./components/LoginScreen";
+import React from 'react';
+import { AuthProvider } from './components/AuthProvider';
+import LoginScreen from './components/LoginScreen';
 
-
-
-export default function App() {
+function App() {
   return (
-    <LoginScreen/>
+    <AuthProvider>
+      <LoginScreen />
+      {/* Rest of your app components */}
+    </AuthProvider>
   );
 }
+
+export default App;
